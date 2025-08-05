@@ -1,0 +1,18 @@
+language: ruby
+
+dist: jammy
+
+ruby:
+  - 3.3.6
+
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install -y build-essential libssl-dev libreadline-dev zlib1g-dev libncurses5-dev libffi-dev libgdbm-dev libyaml-dev
+  - rvm get stable
+  - rvm reload
+
+install: skip
+
+script:
+  - ruby --version
+  - gem --version
