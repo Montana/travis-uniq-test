@@ -1,18 +1,36 @@
-language: ruby
-
+language: minimal
 dist: jammy
 
-ruby:
-  - 3.3.6
+env:
+  - RUBY_VERSION=3.3.6
 
 before_install:
   - sudo apt-get update
-  - sudo apt-get install -y build-essential libssl-dev libreadline-dev zlib1g-dev libncurses5-dev libffi-dev libgdbm-dev libyaml-dev
-  - rvm get stable
-  - rvm reload
+  - sudo apt-get install -y libssl-dev libreadline-dev zlib1g-dev libffi-dev libyaml-dev
 
-install: skip
+install:
+  - |
+    if wget -q https://github.com/ruby/ruby-builder/releases/download/ruby-${RUBY_VERSION}/ruby-${RUBY_VERSION}-linux-x86_64.tar.gz; then
+      echo "Using pre-compiled binary"
+      tar -xzf ruby-${RUBY_VERSION}-linux-x86_64.tar.gz -C $HOME
+      export PATH=$HOME/ruby/bin:$PATH
+    else
+      echo "Compiling from source"
+      wget https://cache.ruby-lang.org/pub/ruby/3.3/ruby-${RUBY_VERSION}.tar.gz
+      tar -xzf ruby-${RUBY_VERSION}.tar.gz
+      cd ruby-${RUBY_VERSION}
+      ./configure --prefix=$HOME/ruby --disable-install-doc
+      make -j$(nproc)
+      make install
+      export PATH=$HOME/ruby/bin:$PATH
+      cd ..
+    fi
 
 script:
+  - export PATH=$HOME/ruby/bin:$PATH
   - ruby --version
-  - gem --version
+  - ruby -e "puts 'Custom Ruby installation successful!'"
+
+cache:
+  directories:
+    - $HOME/ruby
